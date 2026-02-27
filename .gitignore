@@ -1,0 +1,17 @@
+# Build folders
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Test
+TestResults/
+
+# Logs
+*.log
+
+# Rider (nếu có)
+.idea/
