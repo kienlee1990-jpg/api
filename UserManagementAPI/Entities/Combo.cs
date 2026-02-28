@@ -14,6 +14,15 @@ namespace FastFoodAPI.Entities
 
         public string? Description { get; set; }
 
+        // ✅ tồn kho combo
+        public int StockQuantity { get; set; }
+        // ⭐ BẮT BUỘC phải có cái này
+        public bool IsAvailable { get; set; } = true;
+
+        // ⭐ anti oversell (khuyên dùng)
+        [Timestamp]
+        public byte[] RowVersion { get; set; }
+
         public ICollection<ComboFood>? ComboFoods { get; set; }
     }
 }

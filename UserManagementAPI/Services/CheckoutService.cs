@@ -1,101 +1,167 @@
 ﻿using FastFoodAPI.Data;
 using FastFoodAPI.Entities;
+using FastFoodAPI.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace FastFoodAPI.Services
+namespace FastFoodAPI.Services;
+
+public class CheckoutService : ICheckoutService
 {
-    public class CheckoutService
+    private readonly ApplicationDbContext _context;
+
+    public CheckoutService(ApplicationDbContext context)
     {
-        private readonly ApplicationDbContext _context;
+        _context = context;
+    }
 
-        public CheckoutService(ApplicationDbContext context)
+    public async Task<int> CheckoutAsync(string userId)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+            throw new ArgumentException("Invalid user");
+
+        await using var transaction =
+            await _context.Database.BeginTransactionAsync();
+
+        try
         {
-            _context = context;
-        }
+            // =====================================================
+            // 1. Load cart + include sâu
+            // =====================================================
+            var cart = await _context.Carts
+                .Include(c => c.CartItems!)
+                    .ThenInclude(ci => ci.Food)
+                .Include(c => c.CartItems!)
+                    .ThenInclude(ci => ci.Combo)
+                        .ThenInclude(co => co.ComboFoods!)
+                            .ThenInclude(cf => cf.Food)
+                .FirstOrDefaultAsync(c => c.UserId == userId);
 
-        public async Task<int> CheckoutAsync(string userId)
-        {
-            if (string.IsNullOrWhiteSpace(userId))
-                throw new ArgumentException("Invalid user");
+            if (cart == null || !cart.CartItems!.Any())
+                throw new Exception("Cart is empty");
 
-            await using var transaction = await _context.Database.BeginTransactionAsync();
-
-            try
+            // =====================================================
+            // 2. Create order
+            // =====================================================
+            var order = new Order
             {
-                // =====================================================
-                // 1. Lấy cart của user
-                // =====================================================
-                var cart = await _context.Carts
-                    .Include(c => c.CartItems)
-                        .ThenInclude(ci => ci.Food)
-                    .FirstOrDefaultAsync(c => c.UserId == userId);
+                UserId = userId,
+                CreatedAt = DateTime.UtcNow,
+                TotalAmount = 0
+            };
 
-                if (cart == null || cart.CartItems == null || !cart.CartItems.Any())
-                    throw new Exception("Cart is empty");
+            _context.Orders.Add(order);
+            await _context.SaveChangesAsync();
 
-                // =====================================================
-                // 2. Tạo Order
-                // =====================================================
-                var order = new Order
+            // =====================================================
+            // 3. Build order items + trừ kho
+            // =====================================================
+            decimal total = 0;
+            var orderItems = new List<OrderItem>();
+
+            foreach (var item in cart.CartItems)
+            {
+                if (item.Quantity <= 0)
+                    throw new Exception("Invalid quantity");
+
+                decimal price;
+
+                // ================= FOOD =================
+                if (item.FoodId.HasValue)
                 {
-                    UserId = userId,
-                    CreatedAt = DateTime.UtcNow,
-                    TotalPrice = 0
-                };
+                    var food = item.Food
+                        ?? throw new Exception($"Food not found (FoodId={item.FoodId})");
 
-                _context.Orders.Add(order);
-                await _context.SaveChangesAsync();
+                    if (!food.IsAvailable)
+                        throw new Exception($"Food '{food.Name}' is unavailable");
 
-                // =====================================================
-                // 3. Tạo OrderItems + tính tổng
-                // =====================================================
-                decimal total = 0;
-                var orderItems = new List<OrderItem>();
+                    if (food.StockQuantity < item.Quantity)
+                        throw new Exception($"Food '{food.Name}' out of stock");
 
-                foreach (var item in cart.CartItems)
+                    price = food.Price;
+
+                    // 🔥 trừ kho food
+                    food.StockQuantity -= item.Quantity;
+                }
+                // ================= COMBO =================
+                else if (item.ComboId.HasValue)
                 {
-                    if (item.Food == null)
-                        throw new Exception($"Food not found (FoodId={item.FoodId})");
+                    var combo = item.Combo
+                        ?? throw new Exception($"Combo not found (ComboId={item.ComboId})");
 
-                    var price = item.Food.Price;
-                    var lineTotal = item.Quantity * price;
-                    total += lineTotal;
+                    if (!combo.IsAvailable)
+                        throw new Exception($"Combo '{combo.Name}' is unavailable");
 
-                    orderItems.Add(new OrderItem
+                    if (combo.StockQuantity < item.Quantity)
+                        throw new Exception($"Combo '{combo.Name}' out of stock");
+
+                    price = combo.Price;
+
+                    // 🔥 trừ kho combo (nếu bạn quản lý)
+                    combo.StockQuantity -= item.Quantity;
+
+                    // =====================================================
+                    // 🔥 QUAN TRỌNG: trừ tồn từng FOOD trong combo
+                    // =====================================================
+                    if (combo.ComboFoods == null || !combo.ComboFoods.Any())
+                        throw new Exception($"Combo '{combo.Name}' has no foods");
+
+                    foreach (var comboFood in combo.ComboFoods)
                     {
-                        OrderId = order.Id,
-                        FoodId = item.FoodId,
-                        Quantity = item.Quantity,
-                        Price = price
-                    });
+                        var food = comboFood.Food
+                            ?? throw new Exception("Combo food not found");
+
+                        var requiredQty = comboFood.Quantity * item.Quantity;
+
+                        if (food.StockQuantity < requiredQty)
+                            throw new Exception(
+                                $"Food '{food.Name}' is not enough for combo");
+
+                        // ✅ trừ kho food trong combo
+                        food.StockQuantity -= requiredQty;
+                    }
+                }
+                else
+                {
+                    throw new Exception("Invalid cart item");
                 }
 
-                await _context.OrderItems.AddRangeAsync(orderItems);
+                var lineTotal = price * item.Quantity;
+                total += lineTotal;
 
-                // =====================================================
-                // 4. Update tổng tiền
-                // =====================================================
-                order.TotalPrice = total;
-                _context.Orders.Update(order);
-
-                // =====================================================
-                // 5. Clear cart
-                // =====================================================
-                _context.CartItems.RemoveRange(cart.CartItems);
-
-                // =====================================================
-                // 6. Save + Commit
-                // =====================================================
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                return order.Id;
+                orderItems.Add(new OrderItem
+                {
+                    OrderId = order.Id,
+                    FoodId = item.FoodId,
+                    ComboId = item.ComboId,
+                    Quantity = item.Quantity,
+                    Price = price
+                });
             }
-            catch
-            {
-                await transaction.RollbackAsync();
-                throw;
-            }
+
+            await _context.OrderItems.AddRangeAsync(orderItems);
+
+            // =====================================================
+            // 4. Update total
+            // =====================================================
+            order.TotalAmount = total;
+
+            // =====================================================
+            // 5. Clear cart
+            // =====================================================
+            _context.CartItems.RemoveRange(cart.CartItems);
+
+            // =====================================================
+            // 6. Save + commit
+            // =====================================================
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return order.Id;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
         }
     }
 }

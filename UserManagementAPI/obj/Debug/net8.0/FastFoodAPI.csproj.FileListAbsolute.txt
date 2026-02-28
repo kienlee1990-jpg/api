@@ -156,3 +156,4 @@ C:\Users\Lecoo\source\repos\FastFoodAPI\UserManagementAPI\obj\Debug\net8.0\refin
 C:\Users\Lecoo\source\repos\FastFoodAPI\UserManagementAPI\obj\Debug\net8.0\FastFoodAPI.pdb
 C:\Users\Lecoo\source\repos\FastFoodAPI\UserManagementAPI\obj\Debug\net8.0\FastFoodAPI.genruntimeconfig.cache
 C:\Users\Lecoo\source\repos\FastFoodAPI\UserManagementAPI\obj\Debug\net8.0\ref\FastFoodAPI.dll
+C:\Users\Lecoo\source\repos\FastFoodAPI\UserManagementAPI\obj\Debug\net8.0\FastFoodAPI.sourcelink.json

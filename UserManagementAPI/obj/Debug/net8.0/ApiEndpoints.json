@@ -107,47 +107,16 @@
   },
   {
     "ContainingType": "FastFoodAPI.Controllers.CartController",
-    "Method": "AddToCart",
-    "RelativePath": "api/cart/add",
+    "Method": "AddItem",
+    "RelativePath": "api/cart/items",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "foodId",
-        "Type": "System.Int32",
-        "IsRequired": false
-      },
-      {
-        "Name": "quantity",
-        "Type": "System.Int32",
-        "IsRequired": false
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "FastFoodAPI.Controllers.CartController",
-    "Method": "Checkout",
-    "RelativePath": "api/cart/checkout",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "FastFoodAPI.Controllers.CartController",
-    "Method": "RemoveItem",
-    "RelativePath": "api/cart/remove",
-    "HttpMethod": "DELETE",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "foodId",
-        "Type": "System.Int32",
-        "IsRequired": false
+        "Name": "dto",
+        "Type": "FastFoodAPI.DTOs.Cart.AddToCartDto",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": []
@@ -155,19 +124,35 @@
   {
     "ContainingType": "FastFoodAPI.Controllers.CartController",
     "Method": "UpdateQuantity",
-    "RelativePath": "api/cart/update",
+    "RelativePath": "api/cart/items",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
+        "Name": "dto",
+        "Type": "FastFoodAPI.DTOs.Cart.UpdateCartItemDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FastFoodAPI.Controllers.CartController",
+    "Method": "RemoveItem",
+    "RelativePath": "api/cart/items",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
         "Name": "foodId",
-        "Type": "System.Int32",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "IsRequired": false
       },
       {
-        "Name": "quantity",
-        "Type": "System.Int32",
+        "Name": "comboId",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "IsRequired": false
       }
     ],
@@ -253,10 +238,10 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "FastFoodAPI.Controllers.ComboController",
-    "Method": "GetAll",
-    "RelativePath": "api/Combo",
-    "HttpMethod": "GET",
+    "ContainingType": "FastFoodAPI.Controllers.CheckoutController",
+    "Method": "Checkout",
+    "RelativePath": "api/checkout",
+    "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [],
@@ -279,13 +264,128 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "FastFoodAPI.Controllers.ComboController",
+    "Method": "GetPaged",
+    "RelativePath": "api/Combo",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "Search",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "PageNumber",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "PageSize",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FastFoodAPI.Controllers.ComboController",
+    "Method": "GetById",
+    "RelativePath": "api/Combo/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FastFoodAPI.Controllers.ComboController",
+    "Method": "Update",
+    "RelativePath": "api/Combo/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "FastFoodAPI.DTOs.Combo.ComboCreateDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FastFoodAPI.Controllers.ComboController",
+    "Method": "Delete",
+    "RelativePath": "api/Combo/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "FastFoodAPI.Controllers.FoodController",
     "Method": "GetAll",
     "RelativePath": "api/Food",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
+    "Parameters": [
+      {
+        "Name": "Search",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "IsAvailable",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "CategoryId",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "Price",
+        "Type": "System.Nullable\u00601[[System.Decimal, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "PriceTolerance",
+        "Type": "System.Decimal",
+        "IsRequired": false
+      },
+      {
+        "Name": "PageNumber",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "PageSize",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
     "ReturnTypes": []
   },
   {
@@ -298,7 +398,65 @@
     "Parameters": [
       {
         "Name": "dto",
-        "Type": "FastFoodAPI.DTOs.Food.FoodCreateDto",
+        "Type": "FoodCreateDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FastFoodAPI.Controllers.FoodController",
+    "Method": "GetById",
+    "RelativePath": "api/Food/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FastFoodAPI.Controllers.FoodController",
+    "Method": "Update",
+    "RelativePath": "api/Food/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "FastFoodAPI.DTOs.Food.FoodUpdateDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FastFoodAPI.Controllers.FoodController",
+    "Method": "Patch",
+    "RelativePath": "api/Food/{id}",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "FastFoodAPI.DTOs.Food.FoodPatchDto",
         "IsRequired": true
       }
     ],
@@ -321,9 +479,30 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "FastFoodAPI.Controllers.OrderController",
+    "ContainingType": "InventoryController",
+    "Method": "UpdateStock",
+    "RelativePath": "api/inventory/{id}/stock",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "StockInDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "OrderController",
     "Method": "Create",
-    "RelativePath": "api/Order",
+    "RelativePath": "api/orders",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -337,10 +516,47 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "FastFoodAPI.Controllers.OrderController",
-    "Method": "MyOrders",
-    "RelativePath": "api/Order/my",
+    "ContainingType": "OrderController",
+    "Method": "GetById",
+    "RelativePath": "api/orders/{id}",
     "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "OrderController",
+    "Method": "MyOrders",
+    "RelativePath": "api/orders/me",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "page",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "OrderController",
+    "Method": "PlaceFromCart",
+    "RelativePath": "api/orders/place-from-cart",
+    "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [],
@@ -375,6 +591,16 @@
         "IsRequired": true
       }
     ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "FastFoodAPI.Controllers.UsersController",
+    "Method": "GetMe",
+    "RelativePath": "api/users/me",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
     "ReturnTypes": []
   }
 ]

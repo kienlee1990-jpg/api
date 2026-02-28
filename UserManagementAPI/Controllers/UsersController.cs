@@ -20,7 +20,6 @@ public class UsersController : ControllerBase
 
     // 🔵 ADMIN ONLY
     [HttpGet]
-    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetAllUsers()
     {
         var result = await _userService.GetAllUsersAsync();
@@ -43,6 +42,24 @@ public class UsersController : ControllerBase
 
         if (!result.Success)
             return BadRequest(result);
+
+        return Ok(result);
+    }
+
+    // 🟢 CURRENT USER PROFILE
+    [HttpGet("me")]
+    [Authorize]
+    public async Task<IActionResult> GetMe()
+    {
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(currentUserId))
+            return Unauthorized();
+
+        var result = await _userService.GetUserByIdAsync(currentUserId);
+
+        if (result == null)
+            return NotFound();
 
         return Ok(result);
     }

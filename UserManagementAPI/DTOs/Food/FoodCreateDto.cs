@@ -1,16 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace FastFoodAPI.DTOs.Food
+public class FoodCreateDto
 {
-    public class FoodCreateDto
-    {
-        [Required]
-        public string Name { get; set; }
+    [Required]
+    [StringLength(150, MinimumLength = 2)]
+    public string Name { get; set; } = default!;
 
-        public decimal Price { get; set; }
+    [Range(0.01, 1_000_000)]
+    public decimal Price { get; set; }
 
-        public int CategoryId { get; set; }
+    [Range(1, int.MaxValue)]
+    public int CategoryId { get; set; }
 
-        public string? ImageUrl { get; set; }
-    }
+    [Url]
+    public string? ImageUrl { get; set; }
 }

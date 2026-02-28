@@ -3,6 +3,7 @@ using FastFoodAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using FastFoodAPI.DTOs.Cart;
 
 namespace FastFoodAPI.Controllers
 {
@@ -36,83 +37,97 @@ namespace FastFoodAPI.Controllers
         }
 
         // =====================================================
-        // ⭐ GET CART
+        // ⭐ GET MY CART
+        // GET /api/cart
         // =====================================================
         [HttpGet]
         public async Task<IActionResult> GetCart()
         {
             var userId = GetUserId();
+
             var cart = await _cartService.GetCartAsync(userId);
+
+            if (cart == null)
+                return Ok(new { message = "Cart is empty" });
+
             return Ok(cart);
         }
 
         // =====================================================
-        // ⭐ ADD TO CART
+        // ⭐ ADD ITEM
+        // POST /api/cart/items
         // =====================================================
-        [HttpPost("add")]
-        public async Task<IActionResult> AddToCart(int foodId, int quantity = 1)
+        [HttpPost("items")]
+        public async Task<IActionResult> AddItem([FromBody] AddToCartDto dto)
         {
             var userId = GetUserId();
 
-            if (quantity <= 0)
+            if (dto.Quantity <= 0)
                 return BadRequest("Quantity must be greater than 0");
 
-            await _cartService.AddToCartAsync(userId, foodId, quantity);
+            var result = await _cartService.AddToCartAsync(
+                userId,
+                dto.FoodId,
+                dto.ComboId,
+                dto.Quantity);
+
+            if (!result)
+                return BadRequest("Cannot add item to cart");
 
             return Ok(new { message = "Added to cart" });
         }
 
         // =====================================================
         // ⭐ UPDATE QUANTITY
+        // PUT /api/cart/items
         // =====================================================
-        [HttpPut("update")]
-        public async Task<IActionResult> UpdateQuantity(int foodId, int quantity)
+        [HttpPut("items")]
+        public async Task<IActionResult> UpdateQuantity(
+            [FromBody] UpdateCartItemDto dto)
         {
             var userId = GetUserId();
 
-            if (quantity <= 0)
+            if (dto.Quantity <= 0)
                 return BadRequest("Quantity must be greater than 0");
 
-            await _cartService.UpdateQuantityAsync(userId, foodId, quantity);
+            var result = await _cartService.UpdateQuantityAsync(
+                userId,
+                dto.FoodId,
+                dto.ComboId,
+                dto.Quantity);
+
+            if (!result)
+                return NotFound("Item not found in cart");
 
             return Ok(new { message = "Cart updated" });
         }
 
         // =====================================================
         // ⭐ REMOVE ITEM
+        // DELETE /api/cart/items
         // =====================================================
-        [HttpDelete("remove")]
-        public async Task<IActionResult> RemoveItem(int foodId)
+        [HttpDelete("items")]
+        public async Task<IActionResult> RemoveItem(
+            [FromQuery] int? foodId,
+            [FromQuery] int? comboId)
         {
             var userId = GetUserId();
 
-            await _cartService.RemoveFromCartAsync(userId, foodId);
+            var result = await _cartService.RemoveFromCartAsync(
+                userId,
+                foodId,
+                comboId);
+
+            if (!result)
+                return NotFound("Item not found in cart");
 
             return Ok(new { message = "Item removed" });
         }
 
         // =====================================================
         // ⭐ CHECKOUT
+        // POST /api/cart/checkout
         // =====================================================
-        [HttpPost("checkout")]
-        public async Task<IActionResult> Checkout()
-        {
-            var userId = GetUserId();
-
-            try
-            {
-                var orderId = await _checkoutService.CheckoutAsync(userId);
-
-                return Ok(new
-                {
-                    message = "Checkout success",
-                    orderId
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+        
     }
 }

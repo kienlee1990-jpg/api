@@ -23,5 +23,9 @@ namespace FastFoodAPI.Entities
 
         // ===== combo relation =====
         public ICollection<ComboFood>? ComboFoods { get; set; }
+        public bool IsAvailable { get; set; } = true;
+
+        // ✅ tồn kho
+        public int StockQuantity { get; set; }
     }
 }

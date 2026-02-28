@@ -66,4 +66,23 @@ public class UserService : IUserService
 
         return ApiResponse<string>.Ok("Profile updated successfully");
     }
+
+    public async Task<UserDto?> GetUserByIdAsync(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+
+        if (user == null)
+            return null;
+
+        return new UserDto
+        {
+            Id = user.Id,
+            Email = user.Email!,
+            UserName = user.UserName!,
+            FullName = user.FullName,
+            PhoneNumber = user.PhoneNumber,
+            Address = user.Address,
+            CreatedAt = user.CreatedAt
+        };
+    }
 }

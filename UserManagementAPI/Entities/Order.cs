@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using FastFoodAPI.DTOs.Order;
+using System.ComponentModel.DataAnnotations;
 
 namespace FastFoodAPI.Entities
 {
@@ -6,13 +7,16 @@ namespace FastFoodAPI.Entities
     {
         public int Id { get; set; }
 
+        [Required]
         public string UserId { get; set; }
 
-        public decimal TotalPrice { get; set; }
+        public decimal TotalAmount { get; set; }
+
+        public OrderStatus Status { get; set; } = OrderStatus.Pending;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        // navigation ⭐ BẮT BUỘC
-        public ICollection<OrderItem>? OrderItems { get; set; }
+        // ⭐ QUAN TRỌNG: phải khởi tạo
+        public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
 }
